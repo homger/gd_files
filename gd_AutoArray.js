@@ -1,7 +1,7 @@
 'use strict';
 console.log("chainedList.js loaded");
 
-class gd_ChainedList{
+class gd_AutoArray{
     constructor(){
         this.currentIndex = 0;
         this.nextIndex = 0;

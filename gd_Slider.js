@@ -10,7 +10,7 @@ class gd_Slider{
 
         
         this.containersSetup(htmlContainer);
-        this.slideList = new gd_ChainedList();
+        this.slideList = new gd_AutoArray();
         this.autoSlideChangeDirection = "nextSlide";
         
     }
