@@ -8,7 +8,6 @@ script1.src = "chainedList.js";
 class gd_Slider{
     constructor(htmlContainer){
 
-        
         this.containersSetup(htmlContainer);
         this.slideList = new gd_AutoArray();
         this.autoSlideChangeDirection = "nextSlide";

@@ -4,9 +4,9 @@
 
 
 
-/*
+
 class gd_Ajax{
-    constructor(method, url, callBackFunction = null, async = true, autoSend = true){
+    constructor(method, url){
         
 
         this.xmlhttpObj = new XMLHttpRequest();
@@ -19,7 +19,7 @@ class gd_Ajax{
 
     }
 
-    setUp(callBackFunction){
+    setUp(){
         let callBack = this._reponse.bind(this);
         this.xmlhttpObj.onreadystatechange = function(callBackFunction) {
             if (this.readyState == 4 && this.status == 200) {
@@ -46,4 +46,4 @@ class gd_Ajax{
         }
         
     }
-}*/
+}

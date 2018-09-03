@@ -12,6 +12,7 @@ class gd_Signature{
         this.container = container;
         this.memberSetup();
         
+        window.addEventListener("resize", this.setCanvasDimension.bind(this));
     }
 
     memberSetup(){
@@ -69,16 +70,16 @@ class gd_Signature{
     }
 
     mousedown_function(event){
-        console.log("DOWN");
+        //console.log("DOWN");
         this.mousedown = true;
         this.currentPos.x = event.pageX - this.canvasOffset.left;
         this.currentPos.y = event.pageY - this.canvasOffset.top;
     }
     
     mousemove_function(event){
-        console.log("MOVE");
+        //console.log("MOVE");
         if(this.mousedown == true){
-            console.log("MOVE T");
+            //console.log("MOVE T");
             this.previousPos.x = this.currentPos.x;
             this.previousPos.y = this.currentPos.y;
 
@@ -86,17 +87,17 @@ class gd_Signature{
             this.currentPos.y = event.pageY - this.canvasOffset.top;
 
             this.draw();
-            console.log("x: " + this.currentPos.x + "    y: " + this.currentPos.y);
+            //console.log("x: " + this.currentPos.x + "    y: " + this.currentPos.y);
         }
     }
 
     mouseup_function(){
         this.mousedown = false;
-        console.log("UP");
+        //console.log("UP");
     }
 
     mouseleave_function(){
-        console.log("LEAVE");
+        //console.log("LEAVE");
         this.mousedown = false;
     }
 
