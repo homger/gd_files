@@ -23,6 +23,7 @@ class gd_Timer{
         }
         else{
             this.timerEnd = this.now + (duration * 1000);
+            this.timeOver = false;
         }
 
         if(this.monitor){
@@ -39,6 +40,9 @@ class gd_Timer{
     timerPause(){
         this.timerRemainingTimeRegulate();
         this.timerPaused = true;
+        if(this.monitorTimeout){
+            clearTimeout(this.monitorTimeout);
+        }
     }
     get timeString(){
         let cach = new Date(this.time);
@@ -47,16 +51,17 @@ class gd_Timer{
     }
     startMonitor(monitorTicks){
         if( this.time <= 0){
-            this.monitor = false;
+            clearTimeout(this.monitorTimeout);
             this.timeOver = true;
         }
-        if(this.monitor){
+        if(this.monitor && this.timeOver == false){
             this.monitorTimeout = setTimeout(this.startMonitor, monitorTicks);
         }
         else if(this.monitorCallBack){
             this.monitorCallBackFunction();
+            console.log("CALLED BACK FUNCTION ");
         }
     }
+
+
 }
-
-
