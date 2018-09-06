@@ -22,6 +22,14 @@ class gd_SlideShow {
         this.outSlideIndex;
         this.inSlideIndex;
 
+        //AUTO
+        this.autoSlideDirection = "next";
+        this.autoSlideTime = 5000;
+        this.autoSlideActive = false;
+        this.autoSlideTimeOut;
+        this.autoSlide = this.autoSlide.bind(this);
+
+
         this.containerSetUp();
     }
 
@@ -109,6 +117,7 @@ setPositionLeft() {
         if(this.activePrevious) {
             this.slideArray[this.currentIndex].style.left = "0%";
             this.slideArray[this.nextIndex].style.left = "100%";
+            console.log("NEXT ACT");
         }
         else {
             this.slideArray[this.previousIndex].style.left = "-100%";
@@ -210,7 +219,41 @@ previous() {
             P : ${this.previousIndex} || C :  ${this.currentIndex} || N : ${this.nextIndex}
         `);*/
 }
+/************ AUTO SLIDE ********* */
 
+startAutoSlide(seconds) {
+    this.autoSlideActive = true;
+    if( seconds ) {
+        this.autoSlideTime = seconds * 1000;
+    }
+    this.autoSlide();
+}
+
+autoSlide() {
+    this[this.autoSlideDirection]();
+    if(this.autoSlideActive) {
+        this.autoSlideTimeOut  = setTimeout(this.autoSlide, this.autoSlideTime);
+    }
+}
+
+stopAutoSlide() {
+    this.autoSlideActive = false;
+    clearTimeout( this.autoSlideTimeOut );
+}
+
+setAutoSlideDirection(direction){
+    this.stopAutoSlide();
+    if(direction){
+        this.autoSlideDirection = "next";
+    }
+    else{
+        this.autoSlideDirection = "previous";
+    }
+    this.startAutoSlide();
+}
+set direction(direction){
+    this.setAutoSlideDirection(direction);
+}
 
 
 /****************** SETUP ***********************/
@@ -235,7 +278,8 @@ slideStyleSetup(slide) {
     slide.style.height = "100%";
     slide.style.position = "absolute";
     slide.style.top = "0";
-    slide.style.left = 0;
+    /*slide.style.display = "flex";
+    slide.style.alignItems = "center";*/
     slide.style.textAlign = "center";
     slide.style.transitionProperty = "left, right";
     slide.style.transitionDuration = "0.5s";
