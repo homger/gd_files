@@ -9,6 +9,8 @@ class gd_SlideShow {
 
         this.activeNext = false;
         this.activePrevious = false;
+        this.activeNextValue;
+        this.activePreviousValue;
 
         this.currentIndex = 0;
         this.nextIndex;
@@ -29,10 +31,24 @@ class gd_SlideShow {
         this.autoSlideTimeOut;
         this.autoSlide = this.autoSlide.bind(this);
 
+        this.transitionDone = this.transitionDone.bind(this);
+        //style
+        this.transitionDuration = 0.5;
 
         this.containerSetUp();
-    }
 
+        
+        document.addEventListener('keydown', this.keyEvent.bind(this));
+    }
+    keyEvent(event){
+        
+        if(event.key == "ArrowRight"){
+            this.next();
+        }
+        else if(event.key == "ArrowLeft"){
+            this.previous();
+        }
+    }
 
 addSlide(slide) {
     // THE SLDIE GOES IN A DIV
@@ -42,6 +58,8 @@ addSlide(slide) {
         this.slideCount++;
 
         this.slideStyleSetup( this.slideArray[this.slideCount - 1] );
+
+        this.slideArray[this.slideCount - 1].addEventListener("transitionend", this.transitionDone);
 
         if(this.lastItem){
             this.addRegulate();
@@ -191,8 +209,18 @@ containerChildRegulate(callFromeAddFunction = false) {
     }
 }
 /******************** CONTROL ******************************/
+setPreviousNextCachValue(){
+    
+    this.activeNextValue =  this.activeNext;
+    this.activePreviousValue = this.activePrevious;
+}
 
-next() {
+restorPreviousNextCachValue(){
+    this.activeNext = this.activeNextValue;
+    this.activePrevious = this.activePreviousValue;
+}
+
+next(_innerCall) {
     if(this.activeNext) {
 
         this.outSlideIndex = this.previousIndex;
@@ -201,10 +229,27 @@ next() {
         this.setPositionLeft();
         this.containerChildRegulate();
         console.log("N");
+        console.log(_innerCall);
+        
+        if(_innerCall !== true){
+            
+            if( this.transitionDuration > 0) {
+                this.setPreviousNextCachValue();
+                this.activePrevious = false;
+                this.activeNext = false;
+                this.manualDirection = true;
+            }
+
+            if(this.autoSlideActive){
+                this.stopAutoSlide();
+                this.startAutoSlide();
+            }
+        }
+        
     }
 }
 
-previous() {
+previous(_innerCall) {
     if(this.activePrevious) {
 
         this.outSlideIndex = this.nextIndex;
@@ -213,6 +258,23 @@ previous() {
         this.setPositionLeft();
         this.containerChildRegulate();
         console.log("P");
+        console.log(_innerCall);
+
+        if(_innerCall !== true){
+            
+            if( this.transitionDuration > 0) {
+                this.setPreviousNextCachValue();
+                this.activePrevious = false;
+                this.activeNext = false;
+                this.manualDirection = true;
+            }
+            
+            if(this.autoSlideActive){
+                this.stopAutoSlide();
+                this.startAutoSlide();
+            }
+        }
+        
     }
 
     /*console.log(`
@@ -222,15 +284,27 @@ previous() {
 /************ AUTO SLIDE ********* */
 
 startAutoSlide(seconds) {
+    console.log("startAutoSlide");
     this.autoSlideActive = true;
-    if( seconds ) {
-        this.autoSlideTime = seconds * 1000;
+    this.setAutoSlideTime(seconds);
+    this.autoSlideTimeOut  = setTimeout(this.autoSlide, this.autoSlideTime);
+}
+
+setAutoSlideTime(time){
+    if( time ) {
+        if(time < 0.5){
+            this.autoSlideTime = 500;
+        }
+        else{
+            this.autoSlideTime = time * 1000;
+        }
+
     }
-    this.autoSlide();
+    
 }
 
 autoSlide() {
-    this[this.autoSlideDirection]();
+    this[this.autoSlideDirection](true);
     if(this.autoSlideActive) {
         this.autoSlideTimeOut  = setTimeout(this.autoSlide, this.autoSlideTime);
     }
@@ -239,6 +313,7 @@ autoSlide() {
 stopAutoSlide() {
     this.autoSlideActive = false;
     clearTimeout( this.autoSlideTimeOut );
+    console.log("stoped");
 }
 
 setAutoSlideDirection(direction){
@@ -255,10 +330,69 @@ set direction(direction){
     this.setAutoSlideDirection(direction);
 }
 
+/////////////////////BUTTON
+appendButton(){
+    if(!this.buttonMade){
+
+        this.makeButton();
+    }
+    this.globalContainer.appendChild(this.previousButton);
+    this.globalContainer.appendChild(this.nextButton);
+}
+removeButton(){
+    this.globalContainer.removeChild(this.previousButton);
+    this.globalContainer.removeChild(this.nextButton);
+}
+activateButton(){
+    this.previousButton.disabled = false;
+    this.nextButton.disabled = false;
+}
+disableButton(){
+    this.previousButton.disabled = true;
+    this.nextButton.disabled = true;
+}
+makeButton(){
+    console.log("making button");
+    this.previousButton = document.createElement("button");
+    this.previousButton.id = "gd-SlideShow-previous-button";
+    this.previousButton.addEventListener("click", this.previous.bind(this));
+    this.nextButton = document.createElement("button");
+    this.nextButton.id = "gd-SlideShow-next-button";
+    this.nextButton.addEventListener("click", this.next.bind(this));
+    
+    this.buttonMade = true;
+}
+
+transitionDone(event){
+    if(this.manualDirection && event.target === this.slideArray[this.currentIndex]){
+        console.log("Transition done");
+        
+        console.log("Direction true");
+        this.manualDirection = false;
+        this.restorPreviousNextCachValue();
+    }
+}
+
+
 
 /****************** SETUP ***********************/
 
 containerSetUp() {
+
+    let cach = ["relative", "absolute", "fixed"];
+    let set = true;
+    for(let i in cach){
+        if($(this.globalContainer).css("position") == cach[i] ){
+            set =false;
+            break;
+        }
+    }
+    if(set){
+        $(this.globalContainer).css("position","relative");
+    }
+
+
+
     this.container = document.createElement("div");
     this.container.id = "gd-slide-container";
 
@@ -281,8 +415,9 @@ slideStyleSetup(slide) {
     /*slide.style.display = "flex";
     slide.style.alignItems = "center";*/
     slide.style.textAlign = "center";
+    //slide.style.transitionTimingFunction = "linear";
     slide.style.transitionProperty = "left, right";
-    slide.style.transitionDuration = "0.5s";
+    slide.style.transitionDuration = this.transitionDuration +"s";
 
     if(slide.childNodes[0].nodeName == "IMG"  ) {
 
@@ -290,6 +425,24 @@ slideStyleSetup(slide) {
         slide.childNodes[0].style.maxWidth = "100%";
         }
         
+    }
+
+setTransitionDuration(duration){
+
+    let length = this.slideArray.length;
+
+        if(isNaN(duration)){
+            throw new Error("Argument is not a number");
+        }
+
+        else if(this.transitionDuration * 1000 < this.autoSlideTime ){
+            
+            this.transitionDuration = duration;
+
+            for(let i = 0; i < length; ++i){
+                this.slideArray[i].style.transitionDuration = this.transitionDuration + "s";
+            }
+        }
     }
     
 }

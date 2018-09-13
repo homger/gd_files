@@ -3,6 +3,8 @@
 class gd_Timer{
     constructor(monitor = false, monitorTicks = 100, monitorCallBackFunction = null){
         this.timeOver = false;
+        this.startTime;
+        this.manualStartTime = false;
         this.monitor = monitor;
         if(this.monitor){
             this.monitorTimeout;
@@ -17,12 +19,17 @@ class gd_Timer{
         return Date.now();
     }
     startTimer( duration ){
+        this.duration = duration;
         if(this.timerPaused){
             this.timerEnd = this._timerRemainingTime + this.now;
             this.timerPaused = false;
         }
         else{
-            this.timerEnd = this.now + (duration * 1000);
+            if( !this.manualStartTime ){
+                this.startTime = this.now;
+                this.manualStartTime = false;
+            }
+            this.timerEnd = this.startTime + (duration * 1000);
             this.timeOver = false;
         }
 
@@ -30,6 +37,18 @@ class gd_Timer{
             this.startMonitor(this.monitorTicks);
         }
     }
+
+    getTimerStartTime(){
+        return this.startTime;
+    }
+
+    setTimerStartTime(startTime){
+        this.startTime = startTime;
+        this.timerEnd = this.startTime + (this.duration * 1000);
+        this.manualStartTime = true;
+    }
+
+
     get time(){
             this.timerRemainingTimeRegulate();
             return this._timerRemainingTime;
