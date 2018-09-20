@@ -115,7 +115,7 @@ class gd_Signature{
             "width": this.canvasWidth,
             "height": this.canvasHeight,
         });
-        this.canvasOffset =    this.canvas.getBoundingClientRect();    //$(this.canvas).offset();
+        this.canvasOffset = this.canvas.getBoundingClientRect();    //$(this.canvas).offset();
     }
 
     clear(){
