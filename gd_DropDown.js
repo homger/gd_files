@@ -1,6 +1,18 @@
 'use strict';
 
-/*
+let __parentSearch = (element) => {
+    let parent_node = element.parentNode;
+    if(parent_node != null){
+        while(parent_node.nodeName != "BODY" && parent_node.nodeName != "body"){
+            if(parent_node.is_gd_DropItem){
+                return parent_node;
+            }
+            parent_node = parent_node.parentNode;
+        }
+    }            
+    return false;
+}
+
 let __height = (element) => {
     return Math.max(
         //( element.scrollHeight + element.offsetHeight - element.clientHeight ),
@@ -8,7 +20,7 @@ let __height = (element) => {
         element.offsetHeight,
         element.clientHeight,
     )
-}*/
+}
 
 class gd_DropDown{
     constructor(dropclass, buttonclass = null){
@@ -24,13 +36,13 @@ class gd_DropDown{
 
         let length = dropclass_array.length;
         let indexCach = null;
-
+        let parentCach = null;
         for(let i = 0; i < length; ++i){
             gd_DropItem_Array.push( new gd_DropItem(dropclass_array[i], this, i ) );
+            console.log("FOR PARENT ITERATION N° : " + (i + 1 ));
+            if( (parentCach = __parentSearch( gd_DropItem_Array[i].element ) ) ){
 
-            if( gd_DropItem_Array[i].element.parentNode.is_gd_DropItem ){
-                indexCach = gd_DropItem_Array[i].element.parentNode.gd_DropItem.mainArrayIndex;
-
+                indexCach = parentCach.gd_DropItem.mainArrayIndex;
                 gd_DropItem_Array[indexCach].childsArray.push(gd_DropItem_Array[i]);
                 gd_DropItem_Array[indexCach].childCount += 1;
                 gd_DropItem_Array[i].parent = gd_DropItem_Array[indexCach];
@@ -48,15 +60,7 @@ class gd_DropDown{
             console.log("buttonclass ITEM COUNT : " + length );
         }
         console.log("dropclass_array ITEM COUNT: " + length);
-        
-        let __height = (element) => {
-            return Math.max(
-                //( element.scrollHeight + element.offsetHeight - element.clientHeight ),
-                element.scrollHeight,
-                element.offsetHeight,
-                element.clientHeight,
-            )
-        }
+
         for(let i = length-1; i >= 0; --i){
             if( gd_DropItem_Array[i].childCount == 0 ){
                 gd_DropItem_Array[i].height = __height( gd_DropItem_Array[i].element ) + "px";
@@ -136,7 +140,7 @@ class gd_DropItem{
         this.element.is_gd_DropItem = true;
         this.manager = manager;
         this.childsArray = [];
-        this.closeHeight = "10px";
+        this.closeHeight = "50px";
         this.childCount = 0;
         this.openChilds = 0;
         this.isOpen = false;
@@ -164,8 +168,8 @@ class gd_DropItem{
             this.element.style.height = this.height;
         }
         if(this.button){
-            this.event_target = this.button;
-            this.button.addEventListener("click", this.click.bind(this));    
+            //this.event_target = this.button;
+            this.button.addEventListener("click", this.button_click.bind(this));    
         }
         else{
             this.event_target = this.element;
@@ -176,6 +180,9 @@ class gd_DropItem{
         if(this.event_target === event.target){
             this.manager.click(this);
         }
+    }
+    button_click(event){
+        this.manager.click(this);
     }
 
     open(type){
