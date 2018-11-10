@@ -1,6 +1,6 @@
 'use strict';
 
-
+/*
 let __height = (element) => {
     return Math.max(
         //( element.scrollHeight + element.offsetHeight - element.clientHeight ),
@@ -8,12 +8,12 @@ let __height = (element) => {
         element.offsetHeight,
         element.clientHeight,
     )
-}
+}*/
 
 class gd_DropDown{
-    constructor(dropclass){
+    constructor(dropclass, buttonclass = null){
         this.dropclass = dropclass;
-
+        this.buttonclass = buttonclass;
         this.parseHTML();
 
     }
@@ -36,7 +36,27 @@ class gd_DropDown{
                 gd_DropItem_Array[i].parent = gd_DropItem_Array[indexCach];
             }
         }
+        if(this.buttonclass){
+            let buttons_Array = document.getElementsByClassName(this.buttonclass);
+            let length = buttons_Array.length;
+
+            for(let i = 0; i < length; ++i ){
+                if( buttons_Array[i].parentNode.is_gd_DropItem ){
+                    buttons_Array[i].parentNode.gd_DropItem.button = buttons_Array[i];
+                }
+            }
+            console.log("buttonclass ITEM COUNT : " + length );
+        }
         console.log("dropclass_array ITEM COUNT: " + length);
+        
+        let __height = (element) => {
+            return Math.max(
+                //( element.scrollHeight + element.offsetHeight - element.clientHeight ),
+                element.scrollHeight,
+                element.offsetHeight,
+                element.clientHeight,
+            )
+        }
         for(let i = length-1; i >= 0; --i){
             if( gd_DropItem_Array[i].childCount == 0 ){
                 gd_DropItem_Array[i].height = __height( gd_DropItem_Array[i].element ) + "px";
@@ -63,10 +83,10 @@ class gd_DropDown{
                     dropItem.parent.open(1);
                 }
             }
-            if(dropItem.hasChild){
+            if(dropItem.hasChild && dropItem.hasWasOpenChild){
                 let length = dropItem.childCount;
                 for(let i = 0; i < length; ++i){
-                    if(dropItem.childsArray[i].wasOpen){
+                    if(dropItem.childsArray[i].wasOpen || dropItem.childsArray[i].hasWasOpenChild){
                         dropItem.openChilds += 1;
                         dropItem.childsArray[i].open(2);
                     }
@@ -75,7 +95,8 @@ class gd_DropDown{
         }
         else{
             dropItem.wasOpen = false;
-            if(dropItem.hasChild){
+            if(dropItem.hasChild && dropItem.openChilds > 0){
+                dropItem.hasWasOpenChild = true;
                 let length = dropItem.childCount;
                 for(let i = 0; i < length; ++i){
                     if(dropItem.childsArray[i].isOpen){
@@ -83,6 +104,9 @@ class gd_DropDown{
                         dropItem.childsArray[i].close(1);
                     }
                 }
+            }
+            else{
+                dropItem.hasWasOpenChild = false;
             }
             if(dropItem.parent){
                 dropItem.parent.openChilds -= 1;
@@ -118,6 +142,7 @@ class gd_DropItem{
         this.isOpen = false;
         this.wasOpen = false;
         this.hasChild = false;
+        this.hasWasOpenChild = false;
         this.parent = null;
         this.mainArrayIndex = mainArrayIndex;
 
@@ -138,10 +163,17 @@ class gd_DropItem{
             this.wasOpen = true;
             this.element.style.height = this.height;
         }
-        this.element.addEventListener("click", this.click.bind(this));
+        if(this.button){
+            this.event_target = this.button;
+            this.button.addEventListener("click", this.click.bind(this));    
+        }
+        else{
+            this.event_target = this.element;
+            this.element.addEventListener("click", this.click.bind(this));
+        }
     }
     click(event){
-        if(this.element === event.target){
+        if(this.event_target === event.target){
             this.manager.click(this);
         }
     }
@@ -152,6 +184,7 @@ class gd_DropItem{
         this.element.style.height = this.height;
         if( type == 1){
             this.wasOpen = true;
+            this.hasWasOpenChild = true;
             if(this.parent){
                 this.parent.openChilds += 1;
                 if(!this.parent.isOpen){
@@ -160,9 +193,9 @@ class gd_DropItem{
             }
         }
         else if(type == 2){
-            if(this.hasChild){
+            if(this.hasChild && this.hasWasOpenChild){
                 for(let i = 0; i < this.childCount; ++i){
-                    if(this.childsArray[i].wasOpen){
+                    if(this.childsArray[i].wasOpen || this.childsArray[i].hasWasOpenChild){
                         this.openChilds += 1;
                         this.childsArray[i].open(2);
                     }
@@ -174,13 +207,17 @@ class gd_DropItem{
 
         this.isOpen = false;
         if( type == 1){
-            if(this.hasChild){
+            if(this.hasChild && this.openChilds > 0){
+                this.hasWasOpenChild = true;
                 for(let i = 0; i < this.childCount; ++i){
                     if(this.childsArray[i].isOpen){
                         this.openChilds -= 1;
                         this.childsArray[i].close(1);
                     }
                 }
+            }
+            else{
+                this.hasWasOpenChild = false;
             }
         }
         else if( type == 2){
