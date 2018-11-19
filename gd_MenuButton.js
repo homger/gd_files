@@ -166,14 +166,19 @@ class gd_MenuButton{
     click(useStyleSheet){
         if(useStyleSheet){
             this.button.addEventListener("click", this.cssStyleClick.bind(this) );
+            this.clickType = "cssStyleClick";
         }
         else{
             this.button.addEventListener("click", this.jsStyleClick.bind(this) );
+            this.clickType = "jsStyleClick";
         }
 
         
     }
 
+    codeClick(){
+        this[this.clickType]();
+    }
 
     cssStyleClick(){
         this.button.classList.toggle("open");
