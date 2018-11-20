@@ -5,21 +5,23 @@
 
 class gd_AlertBox{
     constructor(container, removeAllAlert = true, zIndex = 100){
+
         this.alertBox = document.createElement("div");
         this.childCount = 0;
         if(container){
             container.appendChild(this.alertBox);
             this.hasContainer = true;
         }
+        else{
+            document.body.appendChild(this.alertBox);
+        }
+
         this.alertBox.classList.toggle("gd_AlertBox");
         this.baseWidth = "10vw";
         this.removeAllAlert = removeAllAlert;
         this.setStyle();
-        if(!this.hasContainer){
-            document.body.appendChild(this.alertBox);
-        }
 
-        if(this.removeAllAlert){
+        if( this.removeAllAlert ){
             let removeAllitem = this.addItem("Click here to remove all");
             removeAllitem.item.addEventListener("click",function(){
                 this.removeAll();
@@ -28,6 +30,8 @@ class gd_AlertBox{
         }
         this.zIndex = zIndex;
     }
+
+
     set zIndex(index){
         this.alertBox.style.zIndex = index;
     }
@@ -36,6 +40,7 @@ class gd_AlertBox{
             this.alertBox.style.width = width;
         }
     }
+
     setStyle(){
         if(this.hasContainer){
             this.alertBox.style.width = "100%";
@@ -54,13 +59,16 @@ class gd_AlertBox{
     addItem(message){
         this.childCount += 1;
         let alertItem = new gd_AlertItem(message, this);
-        if( this.removeAllAlert){
+        if( this.removeAllAlert ){
             if(this.childCount > 1){
                 this.alertBox.insertBefore(alertItem.item, this.alertBox.firstChild.nextSibling);
             }
             else{
                 this.alertBox.appendChild(alertItem.item);
             }
+        }
+        else{
+            this.alertBox.insertBefore(alertItem.item, this.alertBox.firstChild);
         }
         return alertItem;
     }
