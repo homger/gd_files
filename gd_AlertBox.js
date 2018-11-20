@@ -31,6 +31,11 @@ class gd_AlertBox{
     set zIndex(index){
         this.alertBox.style.zIndex = index;
     }
+    set width(width){
+        if(!this.hasContainer){
+            this.alertBox.style.width = width;
+        }
+    }
     setStyle(){
         if(this.hasContainer){
             this.alertBox.style.width = "100%";
