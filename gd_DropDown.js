@@ -23,13 +23,13 @@ let __height = (element) => {
 }
 
 class gd_DropDown{
-    constructor(dropclass, buttonclass = null){
+    constructor(dropclass, buttonclass = null, closeHeight = 50){
         this.dropclass = dropclass;
         this.buttonclass = buttonclass;
-        this.parseHTML();
+        this.parseHTML(closeHeight);
 
     }
-    parseHTML(){
+    parseHTML(closeHeight){
 
         let dropclass_array = document.getElementsByClassName(this.dropclass);
         let gd_DropItem_Array = [];
@@ -38,7 +38,7 @@ class gd_DropDown{
         let indexCach = null;
         let parentCach = null;
         for(let i = 0; i < length; ++i){
-            gd_DropItem_Array.push( new gd_DropItem(dropclass_array[i], this, i ) );
+            gd_DropItem_Array.push( new gd_DropItem(dropclass_array[i], this, i, closeHeight) );
             console.log("FOR PARENT ITERATION N° : " + (i + 1 ));
             if( (parentCach = __parentSearch( gd_DropItem_Array[i].element ) ) ){
 
@@ -134,13 +134,13 @@ class gd_DropDown{
 
 
 class gd_DropItem{
-    constructor(element, manager, mainArrayIndex){
+    constructor(element, manager, mainArrayIndex, closeHeight){
         this.element = element;
         this.element.gd_DropItem = this;
         this.element.is_gd_DropItem = true;
         this.manager = manager;
         this.childsArray = [];
-        this.closeHeight = "50px";
+        this.closeHeight = closeHeight + "px";
         this.childCount = 0;
         this.openChilds = 0;
         this.isOpen = false;
@@ -152,10 +152,13 @@ class gd_DropItem{
 
     }
     setUp(){
-        
+
+        if(this.element.dataset.gd_closeHeight){
+            this.closeHeight = this.element.dataset.gd_closeHeight;
+        }
         if(this.hasChild){
-            this.height = "auto";
             this.closeHeight = "auto";
+            this.height = "auto";
         }
         if(!this.isOpen){
             this.element.style.height = this.closeHeight;
