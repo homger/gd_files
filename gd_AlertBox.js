@@ -4,7 +4,7 @@
 
 
 class gd_AlertBox{
-    constructor(container){
+    constructor(container, removeAllAlert = true, zIndex = 100){
         this.alertBox = document.createElement("div");
         this.childCount = 0;
         if(container){
@@ -13,13 +13,24 @@ class gd_AlertBox{
         }
         this.alertBox.classList.toggle("gd_AlertBox");
         this.baseWidth = "10vw";
-
+        this.removeAllAlert = removeAllAlert;
         this.setStyle();
         if(!this.hasContainer){
             document.body.appendChild(this.alertBox);
         }
-    }
 
+        if(this.removeAllAlert){
+            let removeAllitem = this.addItem("Click here to remove all");
+            removeAllitem.item.addEventListener("click",function(){
+                this.removeAll();
+            }.bind(this));
+            
+        }
+        this.zIndex = zIndex;
+    }
+    set zIndex(index){
+        this.alertBox.style.zIndex = index;
+    }
     setStyle(){
         if(this.hasContainer){
             this.alertBox.style.width = "100%";
@@ -38,7 +49,15 @@ class gd_AlertBox{
     addItem(message){
         this.childCount += 1;
         let alertItem = new gd_AlertItem(message, this);
-        this.alertBox.insertBefore(alertItem.item, this.alertBox.firstChild);
+        if( this.removeAllAlert){
+            if(this.childCount > 1){
+                this.alertBox.insertBefore(alertItem.item, this.alertBox.firstChild.nextSibling);
+            }
+            else{
+                this.alertBox.appendChild(alertItem.item);
+            }
+        }
+        return alertItem;
     }
     addAlert(message){
         this.addItem(message);
@@ -48,6 +67,14 @@ class gd_AlertBox{
         this.childCount -= 1;
         if(this.childCount == 0){
             this.alertBox.parentNode.removeChild(this.alertBox);
+        }
+    }
+
+    removeAll(){
+        let length = this.alertBox.childNodes.length;
+        for(let i = 0; i < length; ++i){
+            this.alertBox.removeChild(this.alertBox.firstChild);
+            this.__childRemoved();
         }
     }
 
@@ -71,9 +98,8 @@ class gd_AlertItem{
         this.item.style.position = "relative";
         this.item.style.width = "100%";
         this.item.style.height = "auto";
-        this.item.style.display = "flex";
-        this.item.style.alignItems = "center";
-        this.item.style.justifyContent = "center";
+        this.item.style.padding = "2px";
+        this.item.style.textAlign = "center";
         this.item.classList.toggle("gd_AlertItem");
 
         this.overLay.style.width = "100%";
