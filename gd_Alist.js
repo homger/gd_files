@@ -55,8 +55,10 @@ class gd_Alist{
             console.log("HAS INACTIVE : " + this.has_deactivated_Items);
         }
 
-        if(args.container){
+        this.user_made_container = false;
+        if(args.container && args.container instanceof HTMLElement){
             this.container = args.container;
+            this.user_made_container = true;
         }
         else{
             this.container = document.createElement("div");
@@ -123,8 +125,9 @@ class gd_Alist{
         });
 
 
-
-        document.body.appendChild(this.container);
+        if(!this.user_made_container){
+            document.body.appendChild(this.container);
+        }
         this.container.appendChild(this.main_container);
 
     }
