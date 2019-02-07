@@ -2,7 +2,7 @@
 
 var A_LIST_CSS_INSERTED = false;
 
-/// This one is good but the " this.binding() " function doesn't
+/// This one is ok but the " this.binding() " function doesn't 
 /// TAKES AN OBJECT (args) TO CONSTRUCT
 /// args.list has the list of items
 /// args.selected has the INDEX OF the SELECTED ITEM
@@ -109,6 +109,9 @@ class gd_Alist{
             }
             deactivated_cach = false;
         });
+        if(this.items_data[this.selected_index].deactivated){
+            this.selectNewSelected();
+        }
         this.update_Items_Class();
 
         this.items_openClose_props = Object.keys(this.items_data[0].open_style);
@@ -248,11 +251,12 @@ class gd_Alist{
     }
     itemClick_ClickFunction(event){
         
-        if(this.isOpen && this.selected_index != event.target.index){
-            this.itemClick_Function(this.list[event.target.index]);
+        if(!this.items_data[event.target.index].deactivated){
+                if(this.isOpen && this.selected_index != event.target.index){
+                    this.itemClick_Function(this.list[event.target.index]);
+                }
+            this.itemClick(event);
         }
-
-        this.itemClick(event);
     }
     eventsSetup(){
 
@@ -270,5 +274,18 @@ class gd_Alist{
         this.apply_style.bind(this);
         this.itemClick.bind(this);
         console.log("BINDING DONNE");
+    }
+    selectNewSelected(){
+        this.items_data.forEach(element =>{
+            if(!element.deactivated){
+                this.items_data[this.selected_index].selected = false;
+                this.items_list[this.selected_index].classList.toggle("a_list_selected");
+                
+                this.selected_index = element.items_list_index;
+                
+                this.items_data[this.selected_index].selected = true;
+                this.items_list[this.selected_index].classList.toggle("a_list_selected");
+            }
+        });
     }
 }
